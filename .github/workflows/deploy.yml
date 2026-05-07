@@ -1,0 +1,75 @@
+name: Deploy to VM
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VM_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy via SSH
+        run: |
+          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
+            set -e
+            
+            echo "Starting deployment..."
+            
+            # Navigate to deployment directory
+            cd ${{ secrets.VM_DEPLOY_PATH }}
+            
+            # Pull latest code from main
+            echo "Pulling latest code..."
+            git fetch origin
+            git checkout main
+            git pull origin main
+            
+            # Build Docker images
+            echo "Building Docker images..."
+            cd src
+            docker-compose build
+            
+            # Stop old containers
+            echo "Stopping old containers..."
+            docker-compose down
+            
+            # Start new containers
+            echo "Starting new containers..."
+            docker-compose up -d
+            
+            # Verify containers are running
+            echo "Verifying deployment..."
+            sleep 5
+            
+            if docker-compose ps | grep -q "Up"; then
+              echo "Deployment successful!"
+              echo "Frontend: http://${{ secrets.VM_HOST }}:3000"
+              echo "Backend API: http://${{ secrets.VM_HOST }}:3001"
+            else
+              echo "Deployment failed - containers not running"
+              exit 1
+            fi
+          EOF
+
+      - name: Notify Slack (Optional)
+        if: success()
+        run: |
+          echo "Deployment completed successfully to ${{ secrets.VM_HOST }}"
+
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          echo "Deployment failed!"
+          exit 1

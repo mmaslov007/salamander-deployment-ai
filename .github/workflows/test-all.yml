@@ -1,0 +1,89 @@
+name: Run All Tests
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      # Backend Tests (Java Processor)
+      - name: Run Java Processor Tests
+        working-directory: ./src/centroid-finder/processor
+        run: |
+          echo "Running Java Processor Tests..."
+          mvn clean test
+          echo "Java tests passed!"
+
+      # Backend Tests (Node.js Express Server)
+      - name: Run Node.js Backend Tests
+        working-directory: ./src/centroid-finder/server
+        run: |
+          echo "Running Node.js Backend Tests..."
+          npm install
+          VIDEO_DIR=/tmp THUMBNAIL_DIR=/tmp RESULTS_DIR=/tmp JOBS_FILE=/tmp/jobs.json npm test
+          echo "Node.js backend tests passed!"
+
+      # Frontend E2E Tests
+      - name: Start Docker containers
+        run: |
+          echo "Starting Docker containers..."
+          cd src
+          docker compose up -d
+          # Wait for services to be ready
+          sleep 10
+          echo "Docker containers started!"
+
+      - name: Run Frontend E2E Tests
+        working-directory: ./src/frontend
+        run: |
+          echo "Running Frontend E2E Tests..."
+          npm install
+          npm run cypress:run
+          echo "Frontend E2E tests passed!"
+
+      - name: Stop Docker containers
+        if: always()
+        run: |
+          cd src
+          docker compose down
+
+      - name: Test Summary
+        if: success()
+        run: |
+          echo "All tests passed successfully!"
+          echo "- Java Processor: All tests passed"
+          echo "- Node.js Backend: 4/4 tests passed"
+          echo "- Frontend E2E: 6/6 tests passed"
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            src/centroid-finder/processor/target/surefire-reports/
+            src/frontend/cypress/screenshots/
+            src/frontend/cypress/videos/

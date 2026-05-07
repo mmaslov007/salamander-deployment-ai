@@ -1,0 +1,30 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: "http://165.232.143.210:3001"
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+    depends_on:
+      - server
+
+  server:
+    build:
+      context: ./centroid-finder
+      dockerfile: server/Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      - PORT=3000
+      - RESULTS_DIR=/app/results
+      - VIDEO_DIR=/app/videos
+      - THUMBNAIL_DIR=/app/thumbnails
+      - JOBS_FILE=/app/jobs.json
+      - JAR_PATH=/app/processor.jar
+    volumes:
+      - ./centroid-finder/server/results:/app/results
+      - ./centroid-finder/server/videos:/app/videos
+      - ./centroid-finder/server/thumbnails:/app/thumbnails

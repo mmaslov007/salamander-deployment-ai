@@ -1,0 +1,15 @@
+io\github\humagitgud\centroidfinder\VideoProcessor.class
+io\github\humagitgud\centroidfinder\ColorDistanceFinder.class
+io\github\humagitgud\centroidfinder\CsvWriter.class
+io\github\humagitgud\centroidfinder\BinarizingImageGroupFinder.class
+io\github\humagitgud\centroidfinder\DfsBinaryGroupFinder.class
+io\github\humagitgud\centroidfinder\ImageGroupFinder.class
+io\github\humagitgud\centroidfinder\BinaryGroupFinder.class
+io\github\humagitgud\centroidfinder\Group.class
+io\github\humagitgud\centroidfinder\DistanceImageBinarizer.class
+io\github\humagitgud\centroidfinder\VideoPlayer.class
+io\github\humagitgud\centroidfinder\VideoProcessorApp.class
+io\github\humagitgud\centroidfinder\Coordinate.class
+io\github\humagitgud\centroidfinder\ImageBinarizer.class
+io\github\humagitgud\centroidfinder\ImageSummaryApp.class
+io\github\humagitgud\centroidfinder\EuclideanColorDistance.class

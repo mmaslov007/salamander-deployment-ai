@@ -1,0 +1,12 @@
+io\github\humagitgud\centroidfinder\CsvWriterTest.class
+io\github\humagitgud\centroidfinder\VideoPlayerTest.class
+io\github\humagitgud\centroidfinder\DistanceImageBinarizerTest.class
+io\github\humagitgud\centroidfinder\BinarizingImageGroupFinderTest$1.class
+io\github\humagitgud\centroidfinder\EuclideanColorDistanceTest.class
+io\github\humagitgud\centroidfinder\VideoProcessorAppTest.class
+io\github\humagitgud\centroidfinder\DfsBinaryGroupFinderTest.class
+io\github\humagitgud\centroidfinder\BinarizingImageGroupFinderTest$DummyBinarizer.class
+io\github\humagitgud\centroidfinder\DistanceImageBinarizerTest$FakeColorDistanceFinder.class
+io\github\humagitgud\centroidfinder\VideoProcessorTest.class
+io\github\humagitgud\centroidfinder\BinarizingImageGroupFinderTest$DummyGroupFinder.class
+io\github\humagitgud\centroidfinder\BinarizingImageGroupFinderTest.class
