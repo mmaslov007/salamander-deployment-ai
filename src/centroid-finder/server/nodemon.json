@@ -1,6 +1,0 @@
-{
-  "ignore": [
-    "results/*",
-    "jobs.json"
-  ]
-} 

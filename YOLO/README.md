@@ -10,13 +10,29 @@ This folder contains the YOLO version of the salamander tracker.
 - `backend/model/analyzer.py` - shared image/video inference logic.
 - `frontend/` - Vite React app for upload, annotated video playback, and metrics.
 
+## Shell Notes
+
+PowerShell examples use `.\.venv\Scripts\python.exe`. Git Bash examples use
+`.venv/Scripts/python.exe`. On macOS/Linux bash, use `.venv/bin/python` instead.
+
 ## Run the Backend
+
+PowerShell:
 
 ```powershell
 cd YOLO/backend/model
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe -m uvicorn app:app --host 127.0.0.1 --port 8000
+```
+
+Git Bash:
+
+```bash
+cd YOLO/backend/model
+python -m venv .venv
+.venv/Scripts/python.exe -m pip install -r requirements.txt
+.venv/Scripts/python.exe -m uvicorn app:app --host 127.0.0.1 --port 8000
 ```
 
 Optional backend settings:
@@ -30,9 +46,15 @@ Health check:
 Invoke-RestMethod http://127.0.0.1:8000/api/health
 ```
 
+```bash
+curl http://127.0.0.1:8000/api/health
+```
+
 ## Run the Frontend
 
-```powershell
+PowerShell or Git Bash:
+
+```bash
 cd YOLO/frontend
 npm install
 npm run dev -- --host 127.0.0.1
@@ -40,12 +62,31 @@ npm run dev -- --host 127.0.0.1
 
 Open `http://127.0.0.1:5173`.
 
+If the backend is running somewhere else:
+
+```powershell
+$env:VITE_API_URL="http://127.0.0.1:8000"
+npm run dev -- --host 127.0.0.1
+```
+
+```bash
+VITE_API_URL="http://127.0.0.1:8000" npm run dev -- --host 127.0.0.1
+```
+
 ## Train Again
 
-From `YOLO/backend/model`:
+From `YOLO/backend/model`.
+
+PowerShell:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\train.py --data ..\..\dataset\ensantina\data.yaml --name ensantina-36 --epochs 50 --imgsz 320 --batch 8 --device cpu
+```
+
+Git Bash:
+
+```bash
+.venv/Scripts/python.exe scripts/train.py --data ../../dataset/ensantina/data.yaml --name ensantina-36 --epochs 50 --imgsz 320 --batch 8 --device cpu
 ```
 
 For the current checkpoint, `last.pt` performed better at practical confidence thresholds than `best.pt`.
@@ -66,16 +107,32 @@ and hard examples before treating the model as reliable.
 
 ## Inference Checkpoints
 
-Run a single-image checkpoint:
+Run a single-image checkpoint.
+
+PowerShell:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\analyze_image.py ..\..\dataset\ensantina\images\val\84109402-ensantina_0036.jpg --output data\checkpoints\single.jpg --conf 0.25
 ```
 
-Run a video checkpoint:
+Git Bash:
+
+```bash
+.venv/Scripts/python.exe scripts/analyze_image.py ../../dataset/ensantina/images/val/84109402-ensantina_0036.jpg --output data/checkpoints/single.jpg --conf 0.25
+```
+
+Run a video checkpoint.
+
+PowerShell:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\analyze_video.py ..\..\..\ensantina.mp4 --output-dir data\checkpoints\video --conf 0.25 --max-frames 60
+```
+
+Git Bash:
+
+```bash
+.venv/Scripts/python.exe scripts/analyze_video.py ../../../ensantina.mp4 --output-dir data/checkpoints/video --conf 0.25 --max-frames 60
 ```
 
 ## Metrics

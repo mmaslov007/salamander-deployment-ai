@@ -1,125 +1,189 @@
-# Salamander Deployment
+# Salamander Deployment AI
 
-A full-stack salamander video project with two tracks: the original centroid
-finder app under `src/`, and the YOLO-based tracker under `YOLO/`.
+YOLO-based salamander video analysis app. Upload a video or run the included
+`ensantina.mp4` sample to produce an annotated video and detection metrics.
 
-## Project Structure
+## Project Layout
 
-- **Frontend** (`src/frontend/`): Next.js React UI for video upload, preview, and result download
-- **Server** (`src/centroid-finder/server/`): Express.js backend API for video management and job orchestration
-- **Processor** (`src/centroid-finder/processor/`): Java application for video frame processing and centroid detection
-- **YOLO Tracker** (`YOLO/`): FastAPI + Vite React workflow for model-based salamander video analysis
+- `YOLO/backend/model/` - FastAPI backend and YOLO inference code.
+- `YOLO/backend/model/weights/salamander-36.pt` - current trained checkpoint.
+- `YOLO/dataset/ensantina/` - 36 labeled frames split into train and val sets.
+- `YOLO/frontend/` - Vite React frontend for upload, playback, and metrics.
+- `ensantina.mp4` - sample video used by the backend sample endpoint.
 
-## Quick Start
+## Prerequisites
 
-### Prerequisites
-
-- Docker & Docker Compose
+- Python 3.11 or newer
+- Node.js 20 or newer
 - Git
 
-### Build & Run
+PowerShell examples use `.\.venv\Scripts\python.exe`. Git Bash examples use
+`.venv/Scripts/python.exe`. On macOS/Linux bash, use `.venv/bin/python` instead.
 
-```bash
-cd src/
-docker compose build
-docker compose up
+## Backend Setup
+
+PowerShell:
+
+```powershell
+cd YOLO/backend/model
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m uvicorn app:app --host 127.0.0.1 --port 8000
 ```
 
-Access the app at:
-Localhost: **http://localhost:3000**
-VM: **http://vm-ip:3000**
-
-### Check Logs
+Git Bash:
 
 ```bash
-docker compose logs -f server
-docker compose logs -f frontend
+cd YOLO/backend/model
+python -m venv .venv
+.venv/Scripts/python.exe -m pip install --upgrade pip
+.venv/Scripts/python.exe -m pip install -r requirements.txt
+.venv/Scripts/python.exe -m uvicorn app:app --host 127.0.0.1 --port 8000
 ```
 
-### Stop
+Health check:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/health
+```
 
 ```bash
-docker compose down
+curl http://127.0.0.1:8000/api/health
 ```
 
-## How It Works
+Useful backend environment variables:
 
-### Centroid Finder
+- `YOLO_WEIGHTS` - override the model checkpoint path.
+- `CORS_ORIGINS` - comma-separated list of allowed frontend origins.
 
-1. **Upload/Select**: Choose a video from the frontend
-2. **Preview**: View thumbnail, adjust target color and threshold
-3. **Process**: Submit for processing (spawns Java centroid finder)
-4. **Download**: Once complete, download the CSV with centroid coordinates
+## Frontend Setup
 
-### YOLO Tracker
+Open a second terminal from the repository root.
 
-See `YOLO/README.md` for the model-backed backend, frontend, training command,
-and current 36-frame demo model.
-
-## Tech Stack
-
-- **Frontend**: Next.js, Material-UI, React
-- **Backend**: Express.js, Node.js
-- **Processor**: Java 21, Maven, JavaCV
-- **DevOps**: Docker, Docker Compose
-
-## Environment Variables
-
-See `.env` in `src/centroid-finder/` for configuration (paths, ports, etc.).
-
-## Testing
-
-### Run Tests Locally
+PowerShell or Git Bash:
 
 ```bash
-# Java tests
-cd src/centroid-finder/processor && mvn test
-
-# Node.js backend tests
-cd src/centroid-finder/server && npm test
-
-# Cypress E2E tests (requires Docker running)
-cd src/frontend && npm run cypress:run
+cd YOLO/frontend
+npm install
+npm run dev -- --host 127.0.0.1
 ```
 
-### Test Coverage
+Open `http://127.0.0.1:5173`.
 
-- **Java Processor**: 45 unit tests covering image processing logic
-- **Node.js Backend**: 4 API integration tests
-- **Frontend E2E**: 6 Cypress end-to-end tests
-- **Total**: 55+ tests ensuring reliability
+If the backend is running somewhere else, set `VITE_API_URL`.
 
-## CI/CD Pipeline
+PowerShell:
 
-Automated workflows handle testing and deployment:
+```powershell
+$env:VITE_API_URL="http://127.0.0.1:8000"
+npm run dev -- --host 127.0.0.1
+```
 
-- **Test Workflow**: Runs on push/PR to `main` or `dev` - executes all 55+ tests (Java, Node.js, E2E)
-- **Deploy Workflow**: Runs on push to `main` (after tests pass) - builds and deploys to VM
-
-### Setting Up Deployment
-
-To enable auto-deployment to your VM, add these GitHub Secrets
-(Settings > Secrets and variables > Actions):
-
-| Secret | Example |
-|--------|---------|
-| `VM_HOST` | `<your IP>` |
-| `VM_USER` | `<your username>` |
-| `VM_SSH_PRIVATE_KEY` | (your SSH private key) |
-| `VM_DEPLOY_PATH` | `/root/salamander-deployment` |
-
-Ensure your SSH public key is in `~/.ssh/authorized_keys` on the VM.
-
-### Manual Deployment
-
-To deploy manually to an Ubuntu VM:
+Git Bash:
 
 ```bash
-# On VM:
-git clone https://github.com/HumaGitGud/salamander-deployment.git
-cd salamander-deployment/src
-docker compose build
-docker compose up -d
+VITE_API_URL="http://127.0.0.1:8000" npm run dev -- --host 127.0.0.1
 ```
 
-Then access at `http://<vm-ip>:3000`
+## Using the App
+
+1. Start the backend on port `8000`.
+2. Start the frontend on port `5173`.
+3. Scroll to the analysis workspace.
+4. Upload a video, or use the included `ensantina.mp4` sample.
+5. Review the annotated video, detection count, detection rate, visible time,
+   average confidence, detection timeline, and center-path plot.
+
+## Command-Line Inference
+
+Run a single image.
+
+PowerShell:
+
+```powershell
+cd YOLO/backend/model
+.\.venv\Scripts\python.exe scripts\analyze_image.py ..\..\dataset\ensantina\images\val\84109402-ensantina_0036.jpg --output data\checkpoints\single.jpg --conf 0.25
+```
+
+Git Bash:
+
+```bash
+cd YOLO/backend/model
+.venv/Scripts/python.exe scripts/analyze_image.py ../../dataset/ensantina/images/val/84109402-ensantina_0036.jpg --output data/checkpoints/single.jpg --conf 0.25
+```
+
+Run a video.
+
+PowerShell:
+
+```powershell
+cd YOLO/backend/model
+.\.venv\Scripts\python.exe scripts\analyze_video.py ..\..\..\ensantina.mp4 --output-dir data\checkpoints\video --conf 0.25 --max-frames 60
+```
+
+Git Bash:
+
+```bash
+cd YOLO/backend/model
+.venv/Scripts/python.exe scripts/analyze_video.py ../../../ensantina.mp4 --output-dir data/checkpoints/video --conf 0.25 --max-frames 60
+```
+
+## Training
+
+The current checkpoint was trained from 36 labeled frames. To retrain from the
+checked-in dataset:
+
+PowerShell:
+
+```powershell
+cd YOLO/backend/model
+.\.venv\Scripts\python.exe scripts\train.py --data ..\..\dataset\ensantina\data.yaml --name ensantina-36 --epochs 50 --imgsz 320 --batch 8 --device cpu
+```
+
+Git Bash:
+
+```bash
+cd YOLO/backend/model
+.venv/Scripts/python.exe scripts/train.py --data ../../dataset/ensantina/data.yaml --name ensantina-36 --epochs 50 --imgsz 320 --batch 8 --device cpu
+```
+
+After training, copy the selected checkpoint to:
+
+```text
+YOLO/backend/model/weights/salamander-36.pt
+```
+
+The model is enough for the application workflow, but it should be retrained
+with more labeled frames before using the results as reliable measurements.
+
+## Verification
+
+Frontend, PowerShell or Git Bash:
+
+```bash
+cd YOLO/frontend
+npm run lint
+npm run build
+```
+
+Backend syntax check.
+
+PowerShell:
+
+```powershell
+cd YOLO/backend/model
+.\.venv\Scripts\python.exe -m py_compile app.py analyzer.py scripts\analyze_image.py scripts\analyze_video.py scripts\train.py scripts\live_inference.py scripts\prepare_dataset.py scripts\visualize_augmentations.py
+```
+
+Git Bash:
+
+```bash
+cd YOLO/backend/model
+.venv/Scripts/python.exe -m py_compile app.py analyzer.py scripts/analyze_image.py scripts/analyze_video.py scripts/train.py scripts/live_inference.py scripts/prepare_dataset.py scripts/visualize_augmentations.py
+```
+
+## More Details
+
+See `YOLO/README.md` for dataset notes, training notes, inference checkpoints,
+metrics, and the color masking vs YOLO comparison.
