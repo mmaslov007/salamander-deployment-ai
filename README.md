@@ -1,12 +1,14 @@
 # Salamander Deployment
 
-A full-stack application for video processing and centroid detection. Upload videos, apply color-based binarization, detect centroids, and download results as CSV.
+A full-stack salamander video project with two tracks: the original centroid
+finder app under `src/`, and the YOLO-based tracker under `YOLO/`.
 
 ## Project Structure
 
 - **Frontend** (`src/frontend/`): Next.js React UI for video upload, preview, and result download
 - **Server** (`src/centroid-finder/server/`): Express.js backend API for video management and job orchestration
 - **Processor** (`src/centroid-finder/processor/`): Java application for video frame processing and centroid detection
+- **YOLO Tracker** (`YOLO/`): FastAPI + Vite React workflow for model-based salamander video analysis
 
 ## Quick Start
 
@@ -42,10 +44,17 @@ docker compose down
 
 ## How It Works
 
+### Centroid Finder
+
 1. **Upload/Select**: Choose a video from the frontend
 2. **Preview**: View thumbnail, adjust target color and threshold
 3. **Process**: Submit for processing (spawns Java centroid finder)
 4. **Download**: Once complete, download the CSV with centroid coordinates
+
+### YOLO Tracker
+
+See `YOLO/README.md` for the model-backed backend, frontend, training command,
+and current 36-frame demo model.
 
 ## Tech Stack
 
@@ -89,7 +98,8 @@ Automated workflows handle testing and deployment:
 
 ### Setting Up Deployment
 
-To enable auto-deployment to your VM, add these GitHub Secrets (Settings → Secrets and variables → Actions):
+To enable auto-deployment to your VM, add these GitHub Secrets
+(Settings > Secrets and variables > Actions):
 
 | Secret | Example |
 |--------|---------|

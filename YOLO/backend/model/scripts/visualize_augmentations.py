@@ -21,11 +21,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-# Each entry: (label_for_panel, transform_key, magnitude_used_for_demo).
-# The magnitudes here are picked to be visually clear, not the YOLO defaults.
-# Real YOLO training applies these as random magnitudes within bounds, so a
-# value like hsv_h=0.015 produces subtle variation each step. The demo uses
-# the maximum magnitude so students can see what each knob actually does.
 AUGMENTATIONS = [
     ("original",         None,          None),
     ("hsv_h = 0.5",      "hsv_h",       0.5),
@@ -66,9 +61,8 @@ def apply_affine(
     these into a single matrix internally, but the visual result is similar.
     """
     h, w = img.shape[:2]
-    border = (114, 114, 114)  # YOLO's default gray fill
+    border = (114, 114, 114)
 
-    # Rotate + scale around the center, then add translation.
     M = cv2.getRotationMatrix2D((w / 2, h / 2), degrees, scale)
     M[0, 2] += translate * w
     M[1, 2] += translate * h
@@ -100,7 +94,7 @@ def apply_mosaic(images: list[np.ndarray], target_size: int = 640) -> np.ndarray
 
 
 def apply_mixup(img1: np.ndarray, img2: np.ndarray, alpha: float = 0.5) -> np.ndarray:
-    """Blend two images. YOLO uses Beta-distribution alpha; 0.5 is a clear demo value."""
+    """Blend two images."""
     h, w = img1.shape[:2]
     img2_resized = cv2.resize(img2, (w, h))
     return cv2.addWeighted(img1, alpha, img2_resized, 1 - alpha, 0)
