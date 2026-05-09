@@ -24,6 +24,10 @@ import cv2
 from ultralytics import YOLO
 
 
+MODEL_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_WEIGHTS = MODEL_ROOT / "weights" / "salamander-36.pt"
+
+
 def open_webcam(index: int = 0):
     """Open the webcam, falling back to DSHOW on Windows."""
     cap = cv2.VideoCapture(index)
@@ -63,7 +67,7 @@ def draw_overlay(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--weights", default="runs/detect/run1/weights/best.pt",
+    parser.add_argument("--weights", default=str(DEFAULT_WEIGHTS),
                         help="Path to the trained .pt weights file")
     parser.add_argument("--conf", type=float, default=0.1,
                         help="Confidence threshold for detections")
@@ -98,15 +102,10 @@ def main() -> None:
         dt = now - last_time
         last_time = now
 
-        # Run inference. verbose=False keeps the terminal quiet.
         results = model(frame, conf=args.conf, imgsz=args.imgsz, verbose=False)
         result = results[0]
-        annotated = result.plot()  # frame with boxes, labels, and confidences drawn
+        annotated = result.plot()
 
-        # Tally what we saw this frame, then add dt to any class that had >= 1
-        # detection. We count, not "is present at all", so a frame with three
-        # markers contributes 1*dt to the marker timer (you only get to be on
-        # screen once per frame), but the "now" counter reflects the count.
         class_counts: dict[str, int] = defaultdict(int)
         for cls_id in result.boxes.cls.cpu().numpy().astype(int):
             class_counts[model.names[int(cls_id)]] += 1

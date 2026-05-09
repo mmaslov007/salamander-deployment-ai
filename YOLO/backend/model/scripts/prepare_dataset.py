@@ -1,4 +1,4 @@
-"""Convert a Label Studio YOLO export into a train/val split with dataset.yaml.
+"""Convert a Label Studio YOLO export into a train/val split with data.yaml.
 
 Label Studio's "YOLO" export format produces:
     <export_dir>/
@@ -20,7 +20,7 @@ The output directory (default data/dataset/) ends up looking like:
         images/val/
         labels/train/
         labels/val/
-        dataset.yaml
+        data.yaml
 """
 import argparse
 import random
@@ -46,6 +46,9 @@ def main() -> None:
     src_labels = src / "labels"
     classes_file = src / "classes.txt"
 
+    if not 0 < args.val_fraction < 1:
+        raise SystemExit("--val-fraction must be greater than 0 and less than 1")
+
     if not src_images.is_dir() or not src_labels.is_dir():
         raise SystemExit(
             f"Expected {src_images} and {src_labels} to exist. "
@@ -57,14 +60,15 @@ def main() -> None:
                          if p.suffix.lower() in (".jpg", ".jpeg", ".png"))
     if not image_paths:
         raise SystemExit(f"No images found in {src_images}")
+    if len(image_paths) < 2:
+        raise SystemExit("Need at least 2 images so both train and val splits are non-empty")
 
     random.seed(args.seed)
     random.shuffle(image_paths)
-    n_val = max(1, int(len(image_paths) * args.val_fraction))
+    n_val = min(len(image_paths) - 1, max(1, int(len(image_paths) * args.val_fraction)))
     val_paths = image_paths[:n_val]
     train_paths = image_paths[n_val:]
 
-    # Wipe and recreate the destination so re-running is deterministic.
     if dst.exists():
         shutil.rmtree(dst)
     for split in ("train", "val"):
@@ -77,8 +81,6 @@ def main() -> None:
         if label_path.exists():
             shutil.copy(label_path, dst / "labels" / split / label_path.name)
         else:
-            # An image without a label is treated as a negative sample by YOLO.
-            # We allow it but warn so the student notices unlabeled frames.
             print(f"  warning: no label for {img_path.name}")
 
     for p in train_paths:
@@ -86,16 +88,13 @@ def main() -> None:
     for p in val_paths:
         copy_pair(p, "val")
 
-    # Read class names from the export. Fall back to a single class if missing.
     if classes_file.exists():
         names = [line.strip() for line in classes_file.read_text().splitlines() if line.strip()]
     else:
         names = ["object"]
         print("  warning: classes.txt missing in export, defaulting to 'object'")
 
-    # Write dataset.yaml using an absolute path so YOLO can locate images
-    # regardless of where train.py is run from.
-    yaml_path = dst / "dataset.yaml"
+    yaml_path = dst / "data.yaml"
     lines = [
         f"path: {dst.resolve()}",
         "train: images/train",
