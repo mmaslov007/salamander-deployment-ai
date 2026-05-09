@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 :root {
   --text: #9ca3af;
   --text-h: #f3f4f6;
@@ -8,13 +12,14 @@
   --accent: #4ade80;
   --accent-bg: rgba(74, 222, 128, 0.08);
   --shadow:
-    rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+    rgba(0, 0, 0, 0.4) 0 10px 15px -3px,
+    rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
 
   font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
+  letter-spacing: 0;
   color-scheme: dark;
   color: var(--text);
   background: var(--bg);
@@ -26,21 +31,38 @@
 
 body {
   margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 #root {
   width: 100%;
   min-height: 100svh;
-  display: flex;
-  flex-direction: column;
 }
 
-h1, h2, h3 {
+button,
+input {
+  font: inherit;
+}
+
+h1,
+h2,
+h3 {
   font-family: var(--heading);
-  font-weight: 600;
-  color: var(--text-h);
 }
 
-p {
-  margin: 0;
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(74, 222, 128, 0.28);
+  outline-offset: 2px;
+}
+
+::selection {
+  color: #0a140e;
+  background: var(--accent);
 }
