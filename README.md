@@ -6,8 +6,8 @@ YOLO-based salamander video analysis app. Upload a video or run the included
 ## Project Layout
 
 - `YOLO/backend/model/` - FastAPI backend and YOLO inference code.
-- `YOLO/backend/model/weights/salamander-36.pt` - current trained checkpoint.
-- `YOLO/dataset/ensantina/` - 36 labeled frames split into train and val sets.
+- `YOLO/backend/model/weights/salamander.pt` - default trained checkpoint.
+- `YOLO/dataset/ensantina/` - sample YOLO-format dataset for smoke tests.
 - `YOLO/frontend/` - Vite React frontend for upload, playback, and metrics.
 - `ensantina.mp4` - sample video used by the backend sample endpoint.
 
@@ -26,7 +26,7 @@ PowerShell:
 
 ```powershell
 cd YOLO/backend/model
-python -m venv .venv
+if (!(Test-Path .\.venv\Scripts\python.exe)) { python -m venv .venv }
 .\.venv\Scripts\python.exe -m pip install --upgrade pip
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 .\.venv\Scripts\python.exe -m uvicorn app:app --host 127.0.0.1 --port 8000
@@ -36,7 +36,7 @@ Git Bash:
 
 ```bash
 cd YOLO/backend/model
-python -m venv .venv
+test -x .venv/Scripts/python.exe || python -m venv .venv
 .venv/Scripts/python.exe -m pip install --upgrade pip
 .venv/Scripts/python.exe -m pip install -r requirements.txt
 .venv/Scripts/python.exe -m uvicorn app:app --host 127.0.0.1 --port 8000
@@ -66,7 +66,7 @@ PowerShell or Git Bash:
 ```bash
 cd YOLO/frontend
 npm install
-npm run dev -- --host 127.0.0.1
+npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
 ```
 
 Open `http://127.0.0.1:5173`.
@@ -77,13 +77,13 @@ PowerShell:
 
 ```powershell
 $env:VITE_API_URL="http://127.0.0.1:8000"
-npm run dev -- --host 127.0.0.1
+npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
 ```
 
 Git Bash:
 
 ```bash
-VITE_API_URL="http://127.0.0.1:8000" npm run dev -- --host 127.0.0.1
+VITE_API_URL="http://127.0.0.1:8000" npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
 ```
 
 ## Using the App
@@ -103,14 +103,14 @@ PowerShell:
 
 ```powershell
 cd YOLO/backend/model
-.\.venv\Scripts\python.exe scripts\analyze_image.py ..\..\dataset\ensantina\images\val\84109402-ensantina_0036.jpg --output data\checkpoints\single.jpg --conf 0.25
+.\.venv\Scripts\python.exe scripts\analyze_image.py ..\..\dataset\ensantina\images\val\eeaca3d6-ensantina_0032.jpg --output data\checkpoints\single.jpg --conf 0.25
 ```
 
 Git Bash:
 
 ```bash
 cd YOLO/backend/model
-.venv/Scripts/python.exe scripts/analyze_image.py ../../dataset/ensantina/images/val/84109402-ensantina_0036.jpg --output data/checkpoints/single.jpg --conf 0.25
+.venv/Scripts/python.exe scripts/analyze_image.py ../../dataset/ensantina/images/val/eeaca3d6-ensantina_0032.jpg --output data/checkpoints/single.jpg --conf 0.25
 ```
 
 Run a video.
@@ -131,31 +131,30 @@ cd YOLO/backend/model
 
 ## Training
 
-The current checkpoint was trained from 36 labeled frames. To retrain from the
-checked-in dataset:
+For a stronger model, build a combined Label Studio export from multiple videos
+and label at least 150 total frames with the `salamander` class. Export as
+`YOLO` with images included, then prepare a split dataset and train from it.
 
 PowerShell:
 
 ```powershell
 cd YOLO/backend/model
-.\.venv\Scripts\python.exe scripts\train.py --data ..\..\dataset\ensantina\data.yaml --name ensantina-36 --epochs 50 --imgsz 320 --batch 8 --device cpu
+.\.venv\Scripts\python.exe scripts\prepare_dataset.py --export-dir data\labelstudio_exports\salamander-combined-yolo --output ..\..\dataset\salamander-combined --val-fraction 0.2 --seed 42
+.\.venv\Scripts\python.exe scripts\train.py --data ..\..\dataset\salamander-combined\data.yaml --name salamander-combined-150 --epochs 100 --imgsz 640 --batch 8 --device cpu
+Copy-Item .\runs\detect\salamander-combined-150\weights\best.pt .\weights\salamander.pt -Force
 ```
 
 Git Bash:
 
 ```bash
 cd YOLO/backend/model
-.venv/Scripts/python.exe scripts/train.py --data ../../dataset/ensantina/data.yaml --name ensantina-36 --epochs 50 --imgsz 320 --batch 8 --device cpu
+.venv/Scripts/python.exe scripts/prepare_dataset.py --export-dir data/labelstudio_exports/salamander-combined-yolo --output ../../dataset/salamander-combined --val-fraction 0.2 --seed 42
+.venv/Scripts/python.exe scripts/train.py --data ../../dataset/salamander-combined/data.yaml --name salamander-combined-150 --epochs 100 --imgsz 640 --batch 8 --device cpu
+cp runs/detect/salamander-combined-150/weights/best.pt weights/salamander.pt
 ```
 
-After training, copy the selected checkpoint to:
-
-```text
-YOLO/backend/model/weights/salamander-36.pt
-```
-
-The model is enough for the application workflow, but it should be retrained
-with more labeled frames before using the results as reliable measurements.
+Restart the backend after replacing the checkpoint. See `YOLO/README.md` for
+the full retraining workflow and dataset count checks.
 
 ## Verification
 

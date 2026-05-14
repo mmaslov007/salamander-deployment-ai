@@ -25,7 +25,7 @@ from ultralytics import YOLO
 
 
 MODEL_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_WEIGHTS = MODEL_ROOT / "weights" / "salamander-36.pt"
+DEFAULT_WEIGHTS = MODEL_ROOT / "weights" / "salamander.pt"
 
 
 def open_webcam(index: int = 0):

@@ -16,7 +16,7 @@ from ultralytics import YOLO
 
 
 MODEL_ROOT = Path(__file__).resolve().parent
-DEFAULT_WEIGHTS = Path(os.environ.get("YOLO_WEIGHTS", MODEL_ROOT / "weights" / "salamander-36.pt"))
+DEFAULT_WEIGHTS = Path(os.environ.get("YOLO_WEIGHTS", MODEL_ROOT / "weights" / "salamander.pt"))
 DEFAULT_CLASS_NAME = "salamander"
 
 
