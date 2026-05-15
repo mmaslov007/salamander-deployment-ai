@@ -1,0 +1,22 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: YOLO/backend/model/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./YOLO/backend/model/weights:/repo/YOLO/backend/model/weights
+      - ./YOLO/backend/model/data:/repo/YOLO/backend/model/data
+    environment:
+      - CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+
+  frontend:
+    build:
+      context: YOLO/frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend

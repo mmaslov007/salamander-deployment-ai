@@ -1,0 +1,4 @@
+YOLO/frontend/node_modules/
+YOLO/backend/model/.venv/
+YOLO/backend/model/runs/
+YOLO/backend/model/data/
