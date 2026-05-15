@@ -193,8 +193,6 @@ All of the following should be in version control so the dataset is reproducible
 | `data/labelstudio/` | Label Studio project |
 | `YOLO/backend/model/weights/salamander.pt` | Trained checkpoint |
 
-Do **not** commit `data/labelstudio/.env` — it contains a secret key.
-
 ---
 
 ## Environment Variables
