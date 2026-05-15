@@ -154,7 +154,7 @@ function App() {
     if (parsedMaxFrames) body.append('max_frames', String(parsedMaxFrames))
     if (!useSample) {
       if (!file) {
-        setError('Choose a video or use the local ensantina sample.')
+        setError('Choose a video file to analyze.')
         setStatusMessage('')
         return
       }
@@ -272,9 +272,6 @@ function App() {
               <div className="button-row">
                 <button type="button" className="primary-action" onClick={() => startAnalysis(false)} disabled={isWorking}>
                   Analyze Upload
-                </button>
-                <button type="button" className="secondary" onClick={() => startAnalysis(true)} disabled={isWorking}>
-                  Analyze ensantina.mp4
                 </button>
               </div>
 
