@@ -17,7 +17,7 @@ PowerShell examples use `.\.venv\Scripts\python.exe`. Git Bash examples use
 
 ## Prerequisites
 
-- Python 3.12 or newer.
+- Python 3.11 or newer.
 - Node.js 20 or newer.
 
 ## Run the Backend
@@ -215,13 +215,13 @@ Run a video checkpoint.
 PowerShell:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\analyze_video.py ..\..\..\ensantina.mp4 --output-dir data\checkpoints\video --conf 0.25 --max-frames 60
+.\.venv\Scripts\python.exe scripts\analyze_video.py ..\..\..\saladata\video\ensantina.mp4 --output-dir data\checkpoints\video --conf 0.25 --max-frames 60
 ```
 
 Git Bash:
 
 ```bash
-.venv/Scripts/python.exe scripts/analyze_video.py ../../../ensantina.mp4 --output-dir data/checkpoints/video --conf 0.25 --max-frames 60
+.venv/Scripts/python.exe scripts/analyze_video.py ../../../saladata/video/ensantina.mp4 --output-dir data/checkpoints/video --conf 0.25 --max-frames 60
 ```
 
 ## Metrics
